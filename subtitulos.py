@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import tempfile
 
+import numpy as np
 import streamlit as st
 from faster_whisper import WhisperModel
 
@@ -26,6 +27,17 @@ def ruta_ffmpeg():
 @st.cache_resource
 def cargar_modelo(nombre):
     return WhisperModel(nombre, device="cpu", compute_type="int8")
+
+
+def cargar_audio(ruta_video, ff):
+    r = subprocess.run(
+        [ff, "-nostdin", "-i", ruta_video, "-vn", "-ac", "1", "-ar", "16000",
+         "-f", "f32le", "-"],
+        capture_output=True,
+    )
+    if r.returncode != 0 or not r.stdout:
+        raise RuntimeError("No pude sacar el audio del video.")
+    return np.frombuffer(r.stdout, dtype=np.float32)
 
 
 def tiempo_srt(seg):
@@ -74,6 +86,10 @@ with col2:
 
 # Paso 1: escuchar el audio y crear los subtítulos
 if st.button("1. Crear subtítulos", type="primary", disabled=video is None):
+    ff = ruta_ffmpeg()
+    if not ff:
+        st.error("No encontré ffmpeg.")
+        st.stop()
     with tempfile.TemporaryDirectory() as tmp:
         ext = os.path.splitext(video.name)[1] or ".mp4"
         entrada = os.path.join(tmp, "entrada" + ext)
@@ -81,8 +97,9 @@ if st.button("1. Crear subtítulos", type="primary", disabled=video is None):
             f.write(video.getbuffer())
         with st.spinner("Escuchando el audio (la primera vez descarga el modelo)..."):
             try:
+                audio = cargar_audio(entrada, ff)
                 segmentos, _ = cargar_modelo(modelo).transcribe(
-                    entrada, language="es", word_timestamps=True, vad_filter=True
+                    audio, language="es", word_timestamps=True, vad_filter=True
                 )
                 palabras = [w for s in segmentos for w in (s.words or [])]
             except Exception as e:
@@ -103,7 +120,7 @@ if "srt" in st.session_state and video is not None:
     if st.button("2. Pegar subtítulos al video", type="primary"):
         ff = ruta_ffmpeg()
         if not ff:
-            st.error("No encontré ffmpeg. Instálalo con: pip install imageio-ffmpeg")
+            st.error("No encontré ffmpeg.")
             st.stop()
 
         alineacion = {"Abajo": 2, "Centro": 5, "Arriba": 8}[posicion]
