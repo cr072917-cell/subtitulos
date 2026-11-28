@@ -4,5 +4,3 @@ fonts-dejavu-core
 fonts-roboto
 fonts-open-sans
 fonts-montserrat
-fonts-bebas-neue
-fonts-anton
