@@ -8,7 +8,7 @@ from faster_whisper import WhisperModel
 
 st.set_page_config(page_title="Subtítulos para tus videos", page_icon="💬")
 
-FUENTES = ["Montserrat", "Anton", "Bebas Neue", "Roboto", "Open Sans", "Liberation Sans", "DejaVu Sans"]
+FUENTES = ["Montserrat", "Roboto", "Open Sans", "Liberation Sans", "DejaVu Sans"]
 POSICIONES = ["Arriba", "Centro", "Abajo", "Personalizada"]
 ANIMACIONES = ["Ninguna", "Pop", "Aparecer suave"]
 IDIOMAS = {"Automático": None, "Español": "es", "Inglés": "en"}
@@ -18,7 +18,7 @@ PRESETS = {
     "Reels": dict(palabras=3, mayus=True, fuente="Montserrat", negrita=True, tam=70, pos="Centro",
                   color="#FFFFFF", contorno=4, color_contorno="#000000", sombra=0, caja=False,
                   color_caja="#000000", opac_caja=60, resaltar=True, color_res="#FFD400", anim="Pop"),
-    "Impacto": dict(palabras=2, mayus=True, fuente="Anton", negrita=False, tam=90, pos="Centro",
+    "Impacto": dict(palabras=2, mayus=True, fuente="Montserrat", negrita=True, tam=85, pos="Centro",
                     color="#FFFFFF", contorno=7, color_contorno="#000000", sombra=0, caja=False,
                     color_caja="#000000", opac_caja=60, resaltar=True, color_res="#FF3B3B", anim="Pop"),
     "Documental": dict(palabras=6, mayus=False, fuente="Open Sans", negrita=True, tam=48, pos="Abajo",
