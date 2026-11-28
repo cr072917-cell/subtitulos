@@ -3,6 +3,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import numpy as np
 import streamlit as st
 from faster_whisper import WhisperModel
 
@@ -72,9 +73,20 @@ def dimensiones(ruta):
     return w, h
 
 
+def audio_a_array(ruta):
+    r = subprocess.run(
+        ["ffmpeg", "-nostdin", "-v", "error", "-i", ruta, "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
+        capture_output=True, check=True,
+    )
+    return np.frombuffer(r.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+
+
 def transcribir(ruta, calidad, idioma):
+    audio = audio_a_array(ruta)
+    if audio.size == 0:
+        return []
     modelo = cargar_modelo(calidad)
-    segmentos, _ = modelo.transcribe(ruta, language=idioma, word_timestamps=True, vad_filter=True)
+    segmentos, _ = modelo.transcribe(audio, language=idioma, word_timestamps=True, vad_filter=True)
     palabras = []
     for seg in segmentos:
         for w in seg.words or []:
